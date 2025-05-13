@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
 
-namespace SOLTEC.CodeAnalyzer.Analyzers;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Validates that public classes are properly restricted for inheritance,
@@ -11,7 +11,7 @@ namespace SOLTEC.CodeAnalyzer.Analyzers;
 /// var violations = InheritanceRulesAnalyzer.AnalyzeInheritanceControl(fileContent);
 /// ]]>
 /// </example>
-public static class InheritanceRulesAnalyzer
+public static partial class InheritanceRulesAnalyzer
 {
     /// <summary>
     /// Checks that public classes are not unintentionally inheritable.
@@ -21,27 +21,25 @@ public static class InheritanceRulesAnalyzer
     public static List<string> AnalyzeInheritanceControl(string fileContent)
     {
         var _violations = new List<string>();
-
-        // Regex to find public classes that are NOT sealed or abstract
-        var _publicClassRegex = new Regex(@"\bpublic\s+(?!sealed\b)(?!abstract\b)[^\n]*?\bclass\s+(\w+)", RegexOptions.Multiline);
-        var _matches = _publicClassRegex.Matches(fileContent);
+        var _matches = PublicClassRegex().Matches(fileContent);
 
         foreach (Match _match in _matches)
         {
             string _className = _match.Groups[1].Value;
 
-            // Check if there is any virtual method defined in the file
-            bool _hasVirtualMethod = Regex.IsMatch(
-                fileContent,
-                @$"\b(public|protected)\s+(virtual)\s+[\w<>\[\]]+\s+\w+\s*\(",
-                RegexOptions.Multiline);
-
-            if (!_hasVirtualMethod)
+            bool _hasVirtual = VirtualMethodRegex().IsMatch(fileContent);
+            if (!_hasVirtual)
             {
-                _violations.Add($"Public class '{_className}' must be declared as sealed, abstract, or contain at least one virtual method.");
+                _violations.Add($"Public class '{_className}' must be sealed, abstract, or contain at least one virtual method.");
             }
         }
 
         return _violations;
     }
+
+    [GeneratedRegex(@"\bpublic\s+(?!sealed\b)(?!abstract\b)[^\n]*?\bclass\s+(\w+)", RegexOptions.Multiline)]
+    private static partial Regex PublicClassRegex();
+
+    [GeneratedRegex(@"\b(public|protected)\s+virtual\s+[\w<>\[\]]+\s+\w+\s*\(", RegexOptions.Multiline)]
+    private static partial Regex VirtualMethodRegex();
 }

@@ -1,7 +1,8 @@
-﻿using SOLTEC.CodeAnalyzer.Models;
-using SOLTEC.CodeAnalyzer.Utils;
+﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
 
-namespace SOLTEC.CodeAnalyzer.Analyzers;
+using SOLTEC.CodeAnalyzer.Enums;
+using SOLTEC.CodeAnalyzer.Models;
+using SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
 /// Performs unified analysis of C# types using SOLTEC programming standards.
@@ -19,7 +20,7 @@ public static class TypeAnalyzer
     /// <param name="projectPath">The root directory of the project.</param>
     /// <param name="projectType">The detected project type.</param>
     /// <returns>List of violations grouped by file.</returns>
-    public static List<AnalysisResult> AnalyzeAllTypes(string projectPath, ProjectTypeDetector.ProjectType projectType)
+    public static List<AnalysisResult> AnalyzeAllTypes(string projectPath, ProjectType projectType)
     {
         var _results = new List<AnalysisResult>();
         var _csFiles = FileScanner.GetCsFiles(projectPath);
@@ -39,10 +40,13 @@ public static class TypeAnalyzer
             _violations.AddRange(XmlDocAnalyzer.AnalyzeDocumentation(_content, projectType));
             _violations.AddRange(NamingRulesAnalyzer.AnalyzeNamingRules(_content));
 
-            // Inheritance rule enforcement
+            // Inheritance control rules
             _violations.AddRange(InheritanceRulesAnalyzer.AnalyzeInheritanceControl(_content));
 
-            if (_violations.Any())
+            // Implementation-level checks
+            _violations.AddRange(ImplementationAnalyzer.AnalyzeImplementation(_content));
+
+            if (_violations.Count > 0)
             {
                 _results.Add(new AnalysisResult
                 {

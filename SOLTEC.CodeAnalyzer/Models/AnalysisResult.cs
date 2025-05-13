@@ -22,5 +22,5 @@ public class AnalysisResult
     /// <summary>
     /// List of descriptive violation messages found in the file.
     /// </summary>
-    public List<string> Violations { get; set; } = new();
+    public List<string> Violations { get; set; } = [];
 }

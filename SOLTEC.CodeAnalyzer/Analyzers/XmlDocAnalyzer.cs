@@ -1,109 +1,103 @@
-﻿using SOLTEC.CodeAnalyzer.Utils;
+﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
+
+using SOLTEC.CodeAnalyzer.Enums;
 using System.Text.RegularExpressions;
 
-namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-
 /// <summary>
-/// Analyzes XML documentation compliance in C# files.
+/// Validates XML documentation presence for public and protected members depending on project type.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var violations = XmlDocAnalyzer.AnalyzeDocumentation(code, ProjectTypeDetector.ProjectType.WebApi);
+/// var results = XmlDocAnalyzer.AnalyzeDocumentation(fileContent, ProjectType.WebApi);
 /// ]]>
 /// </example>
-public static class XmlDocAnalyzer
+public static partial class XmlDocAnalyzer
 {
     /// <summary>
-    /// Analyzes a C# file for documentation compliance based on the project type.
+    /// Validates XML documentation tags in a C# file based on project type.
     /// </summary>
-    /// <param name="fileContent">Content of the file.</param>
-    /// <param name="projectType">Type of project for visibility rules.</param>
-    /// <returns>List of violations.</returns>
-    public static List<string> AnalyzeDocumentation(string fileContent, ProjectTypeDetector.ProjectType projectType)
+    /// <param name="fileContent">The content of the file.</param>
+    /// <param name="projectType">The type of project (WebApi, ClassLibrary, etc.).</param>
+    /// <returns>List of violations found.</returns>
+    public static List<string> AnalyzeDocumentation(string fileContent, ProjectType projectType)
     {
-        var _errors = new List<string>();
+        var _violations = new List<string>();
 
-        string _summaryPattern = @"///\s*<summary>.*?</summary>";
-        string _examplePattern = @"///\s*<example>.*?</example>";
+        if (projectType is ProjectType.RazorApp or ProjectType.Unknown)
+            return _violations;
 
-        var _typePatterns = new Dictionary<string, string>
-    {
-        { "class", @"(?:(public|protected|protected\s+internal)\s+)?(?:abstract\s+|static\s+)?class\s+(\w+)" },
-        { "record", @"(?:(public|protected|protected\s+internal)\s+)?(?:partial\s+)?record\s+(\w+)" },
-        { "interface", @"(?:(public|protected|protected\s+internal)\s+)?interface\s+(\w+)" },
-        { "enum", @"(?:(public|protected|protected\s+internal)\s+)?enum\s+(\w+)" },
-        { "struct", @"(?:(public|protected|protected\s+internal)\s+)?(?:readonly\s+)?struct\s+(\w+)" },
-        { "delegate", @"(?:(public|protected|protected\s+internal)\s+)?delegate\s+[\w<>\[\],\s]+\s+(\w+)\s*\(" }
-    };
+        var _lines = fileContent.Split('\n');
 
-        bool _includeInternal = projectType is ProjectTypeDetector.ProjectType.ConsoleApp;
-
-        foreach (var _type in _typePatterns)
+        for (int _i = 0; _i < _lines.Length; _i++)
         {
-            var _matches = Regex.Matches(fileContent, _type.Value, RegexOptions.Multiline);
-            foreach (Match _match in _matches)
+            string _line = _lines[_i].Trim();
+
+            bool _isDeclaration = (_line.StartsWith("public") || _line.StartsWith("protected")) &&
+                (_line.Contains("class ") || _line.Contains("interface ") || _line.Contains("enum ") ||
+                 _line.Contains("struct ") || _line.Contains("record ") || _line.Contains("delegate ") ||
+                 _line.Contains("void ") || _line.Contains("event ") || _line.Contains('(') || _line.Contains('{'));
+
+            if (!_isDeclaration) continue;
+
+            if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
             {
-                string _access = _match.Groups[1].Value?.Trim() ?? "";
-                string _typeName = _match.Groups[2].Success ? _match.Groups[2].Value : "";
-
-                if (!_includeInternal &&
-                    _access != "public" && _access != "protected" && _access != "protected internal")
-                {
-                    continue;
-                }
-
-                string _fullPattern = $@"({_summaryPattern}.*?{_examplePattern})\s*(public|protected|protected\s+internal).*?\s+{_type.Key}\s+{_typeName}";
-
-                if (!Regex.IsMatch(fileContent, _fullPattern, RegexOptions.Singleline))
-                {
-                    _errors.Add($"{_type.Key.First().ToString().ToUpper() + _type.Key[1..]} '{_typeName}' is missing complete XML documentation (summary + example).");
-                }
-            }
-        }
-
-        // Métodos
-        var _methodMatches = Regex.Matches(fileContent, @"(?:(public|protected|protected\s+internal)\s+)?(?:static\s+)?[\w<>]+\s+(\w+)\s*\(.*?\)", RegexOptions.Multiline);
-        foreach (Match _match in _methodMatches)
-        {
-            string _access = _match.Groups[1].Value?.Trim() ?? "";
-            string _methodName = _match.Groups[2].Value;
-
-            if (!_includeInternal &&
-                _access != "public" && _access != "protected" && _access != "protected internal")
-            {
+                _violations.Add($"Missing XML documentation for declaration: '{_line}'");
                 continue;
             }
 
-            string _methodPattern = $@"({_summaryPattern}.*?{_examplePattern})\s*(public|protected|protected\s+internal).*?\s+{_methodName}\s*\(";
+            bool _hasSummary = false;
+            int _searchBack = _i - 1;
 
-            if (!Regex.IsMatch(fileContent, _methodPattern, RegexOptions.Singleline))
+            while (_searchBack >= 0 && _lines[_searchBack].TrimStart().StartsWith("///"))
             {
-                _errors.Add($"Method '{_methodName}' is missing complete XML documentation (summary + example).");
+                if (SummaryTagRegex().IsMatch(_lines[_searchBack]))
+                {
+                    _hasSummary = true;
+                    break;
+                }
+                _searchBack--;
             }
-        }
 
-        // Propiedades
-        var _propertyMatches = Regex.Matches(fileContent, @"(?:(public|protected|protected\s+internal)\s+)?[\w<>]+\s+(\w+)\s*{", RegexOptions.Multiline);
-        foreach (Match _match in _propertyMatches)
-        {
-            string _access = _match.Groups[1].Value?.Trim() ?? "";
-            string _propName = _match.Groups[2].Value;
+            if (!_hasSummary)
+            {
+                _violations.Add($"XML documentation found, but <summary> tag is missing near: '{_line}'");
+            }
 
-            if (!_includeInternal &&
-                _access != "public" && _access != "protected" && _access != "protected internal")
+            if (projectType == ProjectType.ClassLibrary &&
+                (_line.Contains("class ") || _line.Contains("void ") || _line.Contains('(')))
+            {
+                bool _hasExample = false;
+                _searchBack = _i - 1;
+
+                while (_searchBack >= 0 && _lines[_searchBack].TrimStart().StartsWith("///"))
+                {
+                    if (ExampleTagRegex().IsMatch(_lines[_searchBack]))
+                    {
+                        _hasExample = true;
+                        break;
+                    }
+                    _searchBack--;
+                }
+
+                if (!_hasExample)
+                {
+                    _violations.Add($"Missing <example> tag in XML documentation near: '{_line}'");
+                }
+            }
+
+            if (projectType == ProjectType.ConsoleApp &&
+                !_line.Contains("Program") && !_line.Contains("Main"))
             {
                 continue;
             }
-
-            string _propPattern = $@"({_summaryPattern})\s*(public|protected|protected\s+internal).*?\s+{_propName}\s*{{";
-
-            if (!Regex.IsMatch(fileContent, _propPattern, RegexOptions.Singleline))
-            {
-                _errors.Add($"Property '{_propName}' is missing XML documentation (summary).");
-            }
         }
 
-        return _errors;
+        return _violations;
     }
+
+    [GeneratedRegex(@"///\s*<summary>", RegexOptions.Multiline)]
+    private static partial Regex SummaryTagRegex();
+
+    [GeneratedRegex(@"///\s*<example>", RegexOptions.Multiline)]
+    private static partial Regex ExampleTagRegex();
 }
