@@ -1,73 +1,89 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-/// <summary>
-/// Analyzes the presence and completeness of XML documentation in C# code.
-/// </summary>
-/// <example>
-/// <![CDATA[
-/// var result = XmlDocAnalyzer.AnalyzeDocumentation(fileContent);
-/// foreach (var error in result)
-/// {
-///     Console.WriteLine(error);
-/// }
-/// ]]>
-/// </example>
-public static class XmlDocAnalyzer
+namespace SOLTEC.CodeAnalyzer.Analyzers
 {
+
     /// <summary>
-    /// Analyzes a .cs file for XML documentation compliance on public/protected members.
+    /// Analyzes the presence and completeness of XML documentation in C# types,
+    /// including classes, records, interfaces, enums, structs, and delegates.
     /// </summary>
-    /// <param name="fileContent">The source code of the file.</param>
-    /// <returns>A list of rule violations found in the file.</returns>
-    public static List<string> AnalyzeDocumentation(string fileContent)
+    /// <example>
+    /// <![CDATA[
+    /// var result = XmlDocAnalyzer.AnalyzeDocumentation(fileContent);
+    /// foreach (var error in result)
+    /// {
+    ///     Console.WriteLine(error);
+    /// }
+    /// ]]>
+    /// </example>
+    public static class XmlDocAnalyzer
     {
-        var _errors = new List<string>();
-
-        // Regex for detecting documented elements
-        var _docRegex = new Regex(@"///\s*<summary>.*?</summary>", RegexOptions.Singleline);
-        var _exampleRegex = new Regex(@"///\s*<example>.*?</example>", RegexOptions.Singleline);
-
-        // Check for classes
-        var _classMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?(?:abstract\s+|static\s+)?class\s+(\w+)", RegexOptions.Multiline);
-        foreach (Match _match in _classMatches)
+        /// <summary>
+        /// Analyzes a .cs file for XML documentation compliance on public/protected types and members.
+        /// </summary>
+        /// <param name="fileContent">The source code of the file.</param>
+        /// <returns>A list of rule violations found in the file.</returns>
+        public static List<string> AnalyzeDocumentation(string fileContent)
         {
-            string _className = _match.Groups[2].Value;
-            string _classPattern = $@"(///\s*<summary>.*?</summary>.*?<example>.*?</example>)\s*(public|protected).*class\s+{_className}";
+            var _errors = new List<string>();
 
-            if (!Regex.IsMatch(fileContent, _classPattern, RegexOptions.Singleline))
-            {
-                _errors.Add($"Class '{_className}' is missing complete XML documentation (summary + example).");
-            }
-        }
+            // Common patterns
+            var _summaryPattern = @"///\s*<summary>.*?</summary>";
+            var _examplePattern = @"///\s*<example>.*?</example>";
 
-        // Check for methods
-        var _methodMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?(?:static\s+)?[\w<>]+\s+(\w+)\s*\(.*?\)", RegexOptions.Multiline);
-        foreach (Match _match in _methodMatches)
+            // Unified type detection (class, record, interface, enum, struct, delegate)
+            var _typePatterns = new Dictionary<string, string>
         {
-            string _methodName = _match.Groups[2].Value;
-            string _methodPattern = $@"(///\s*<summary>.*?</summary>.*?<example>.*?</example>)\s*(public|protected).*?\s+{_methodName}\s*\(";
+            { "class", @"(?:(public|protected)\s+)?(?:abstract\s+|static\s+)?class\s+(\w+)" },
+            { "record", @"(?:(public|protected)\s+)?(?:partial\s+)?record\s+(\w+)" },
+            { "interface", @"(?:(public|protected)\s+)?interface\s+(\w+)" },
+            { "enum", @"(?:(public|protected)\s+)?enum\s+(\w+)" },
+            { "struct", @"(?:(public|protected)\s+)?(?:readonly\s+)?struct\s+(\w+)" },
+            { "delegate", @"(?:(public|protected)\s+)?delegate\s+[\w<>\[\],\s]+\s+(\w+)\s*\(" }
+        };
 
-            if (!Regex.IsMatch(fileContent, _methodPattern, RegexOptions.Singleline))
+            foreach (var _type in _typePatterns)
             {
-                _errors.Add($"Method '{_methodName}' is missing complete XML documentation (summary + example).");
+                var _matches = Regex.Matches(fileContent, _type.Value, RegexOptions.Multiline);
+                foreach (Match _match in _matches)
+                {
+                    string _typeName = _match.Groups[2].Success ? _match.Groups[2].Value : _match.Groups[1].Value;
+                    string _fullPattern = $@"({_summaryPattern}.*?{_examplePattern})\s*(public|protected).*?\s+{_type.Key}\s+{_typeName}";
+
+                    if (!Regex.IsMatch(fileContent, _fullPattern, RegexOptions.Singleline))
+                    {
+                        _errors.Add($"{_type.Key.First().ToString().ToUpper() + _type.Key.Substring(1)} '{_typeName}' is missing complete XML documentation (summary + example).");
+                    }
+                }
             }
-        }
 
-        // Check for properties (summary only)
-        var _propertyMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?[\w<>]+\s+(\w+)\s*{", RegexOptions.Multiline);
-        foreach (Match _match in _propertyMatches)
-        {
-            string _propName = _match.Groups[2].Value;
-            string _propPattern = $@"(///\s*<summary>.*?</summary>)\s*(public|protected).*?\s+{_propName}\s*{{";
-
-            if (!Regex.IsMatch(fileContent, _propPattern, RegexOptions.Singleline))
+            // Métodos
+            var _methodMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?(?:static\s+)?[\w<>]+\s+(\w+)\s*\(.*?\)", RegexOptions.Multiline);
+            foreach (Match _match in _methodMatches)
             {
-                _errors.Add($"Property '{_propName}' is missing XML documentation (summary).");
-            }
-        }
+                string _methodName = _match.Groups[2].Value;
+                string _methodPattern = $@"({_summaryPattern}.*?{_examplePattern})\s*(public|protected).*?\s+{_methodName}\s*\(";
 
-        return _errors;
+                if (!Regex.IsMatch(fileContent, _methodPattern, RegexOptions.Singleline))
+                {
+                    _errors.Add($"Method '{_methodName}' is missing complete XML documentation (summary + example).");
+                }
+            }
+
+            // Propiedades
+            var _propertyMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?[\w<>]+\s+(\w+)\s*{", RegexOptions.Multiline);
+            foreach (Match _match in _propertyMatches)
+            {
+                string _propName = _match.Groups[2].Value;
+                string _propPattern = $@"({_summaryPattern})\s*(public|protected).*?\s+{_propName}\s*{{";
+
+                if (!Regex.IsMatch(fileContent, _propPattern, RegexOptions.Singleline))
+                {
+                    _errors.Add($"Property '{_propName}' is missing XML documentation (summary).");
+                }
+            }
+
+            return _errors;
+        }
     }
 }
