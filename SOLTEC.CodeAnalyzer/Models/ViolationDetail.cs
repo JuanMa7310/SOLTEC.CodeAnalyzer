@@ -1,6 +1,4 @@
-﻿// File: ViolationDetail.cs
-
-namespace SOLTEC.CodeAnalyzer.Models;
+﻿namespace SOLTEC.CodeAnalyzer.Models;
 
 /// <summary>
 /// Represents a detailed rule violation found during analysis.

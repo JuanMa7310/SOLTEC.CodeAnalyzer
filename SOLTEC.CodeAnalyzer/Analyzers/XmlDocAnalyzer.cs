@@ -1,75 +1,103 @@
-﻿// File: XmlDocAnalyzer.cs
+﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
 
-namespace SOLTEC.CodeAnalyzer.Analyzers;
-
+using SOLTEC.CodeAnalyzer.Enums;
 using System.Text.RegularExpressions;
 
 /// <summary>
-/// Analyzes the presence and completeness of XML documentation in C# code.
+/// Validates XML documentation presence for public and protected members depending on project type.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var result = XmlDocAnalyzer.AnalyzeDocumentation(fileContent);
-/// foreach (var error in result)
-/// {
-///     Console.WriteLine(error);
-/// }
+/// var results = XmlDocAnalyzer.AnalyzeDocumentation(fileContent, ProjectType.WebApi);
 /// ]]>
 /// </example>
-public static class XmlDocAnalyzer
+public static partial class XmlDocAnalyzer
 {
     /// <summary>
-    /// Analyzes a .cs file for XML documentation compliance on public/protected members.
+    /// Validates XML documentation tags in a C# file based on project type.
     /// </summary>
-    /// <param name="fileContent">The source code of the file.</param>
-    /// <returns>A list of rule violations found in the file.</returns>
-    public static List<string> AnalyzeDocumentation(string fileContent)
+    /// <param name="fileContent">The content of the file.</param>
+    /// <param name="projectType">The type of project (WebApi, ClassLibrary, etc.).</param>
+    /// <returns>List of violations found.</returns>
+    public static List<string> AnalyzeDocumentation(string fileContent, ProjectType projectType)
     {
-        var _errors = new List<string>();
+        var _violations = new List<string>();
 
-        // Regex for detecting documented elements
-        var _docRegex = new Regex(@"///\s*<summary>.*?</summary>", RegexOptions.Singleline);
-        var _exampleRegex = new Regex(@"///\s*<example>.*?</example>", RegexOptions.Singleline);
+        if (projectType is ProjectType.RazorApp or ProjectType.Unknown)
+            return _violations;
 
-        // Check for classes
-        var _classMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?(?:abstract\s+|static\s+)?class\s+(\w+)", RegexOptions.Multiline);
-        foreach (Match _match in _classMatches)
+        var _lines = fileContent.Split('\n');
+
+        for (int _i = 0; _i < _lines.Length; _i++)
         {
-            string _className = _match.Groups[2].Value;
-            string _classPattern = $@"(///\s*<summary>.*?</summary>.*?<example>.*?</example>)\s*(public|protected).*class\s+{_className}";
+            string _line = _lines[_i].Trim();
 
-            if (!Regex.IsMatch(fileContent, _classPattern, RegexOptions.Singleline))
+            bool _isDeclaration = (_line.StartsWith("public") || _line.StartsWith("protected")) &&
+                (_line.Contains("class ") || _line.Contains("interface ") || _line.Contains("enum ") ||
+                 _line.Contains("struct ") || _line.Contains("record ") || _line.Contains("delegate ") ||
+                 _line.Contains("void ") || _line.Contains("event ") || _line.Contains('(') || _line.Contains('{'));
+
+            if (!_isDeclaration) continue;
+
+            if (_i == 0 || !_lines[_i - 1].TrimStart().StartsWith("///"))
             {
-                _errors.Add($"Class '{_className}' is missing complete XML documentation (summary + example).");
+                _violations.Add($"Missing XML documentation for declaration: '{_line}'");
+                continue;
+            }
+
+            bool _hasSummary = false;
+            int _searchBack = _i - 1;
+
+            while (_searchBack >= 0 && _lines[_searchBack].TrimStart().StartsWith("///"))
+            {
+                if (SummaryTagRegex().IsMatch(_lines[_searchBack]))
+                {
+                    _hasSummary = true;
+                    break;
+                }
+                _searchBack--;
+            }
+
+            if (!_hasSummary)
+            {
+                _violations.Add($"XML documentation found, but <summary> tag is missing near: '{_line}'");
+            }
+
+            if (projectType == ProjectType.ClassLibrary &&
+                (_line.Contains("class ") || _line.Contains("void ") || _line.Contains('(')))
+            {
+                bool _hasExample = false;
+                _searchBack = _i - 1;
+
+                while (_searchBack >= 0 && _lines[_searchBack].TrimStart().StartsWith("///"))
+                {
+                    if (ExampleTagRegex().IsMatch(_lines[_searchBack]))
+                    {
+                        _hasExample = true;
+                        break;
+                    }
+                    _searchBack--;
+                }
+
+                if (!_hasExample)
+                {
+                    _violations.Add($"Missing <example> tag in XML documentation near: '{_line}'");
+                }
+            }
+
+            if (projectType == ProjectType.ConsoleApp &&
+                !_line.Contains("Program") && !_line.Contains("Main"))
+            {
+                continue;
             }
         }
 
-        // Check for methods
-        var _methodMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?(?:static\s+)?[\w<>]+\s+(\w+)\s*\(.*?\)", RegexOptions.Multiline);
-        foreach (Match _match in _methodMatches)
-        {
-            string _methodName = _match.Groups[2].Value;
-            string _methodPattern = $@"(///\s*<summary>.*?</summary>.*?<example>.*?</example>)\s*(public|protected).*?\s+{_methodName}\s*\(";
-
-            if (!Regex.IsMatch(fileContent, _methodPattern, RegexOptions.Singleline))
-            {
-                _errors.Add($"Method '{_methodName}' is missing complete XML documentation (summary + example).");
-            }
-        }
-
-        // Check for properties (summary only)
-        var _propertyMatches = Regex.Matches(fileContent, @"(?:(public|protected)\s+)?[\w<>]+\s+(\w+)\s*{", RegexOptions.Multiline);
-        foreach (Match _match in _propertyMatches)
-        {
-            string _propName = _match.Groups[2].Value;
-            string _propPattern = $@"(///\s*<summary>.*?</summary>)\s*(public|protected).*?\s+{_propName}\s*{{";
-
-            if (!Regex.IsMatch(fileContent, _propPattern, RegexOptions.Singleline))
-            {
-                _errors.Add($"Property '{_propName}' is missing XML documentation (summary).");
-            }
-        }
-
-        return _errors;
+        return _violations;
     }
+
+    [GeneratedRegex(@"///\s*<summary>", RegexOptions.Multiline)]
+    private static partial Regex SummaryTagRegex();
+
+    [GeneratedRegex(@"///\s*<example>", RegexOptions.Multiline)]
+    private static partial Regex ExampleTagRegex();
 }

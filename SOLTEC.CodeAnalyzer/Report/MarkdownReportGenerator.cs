@@ -1,9 +1,7 @@
-﻿// File: MarkdownReportGenerator.cs
+﻿using SOLTEC.CodeAnalyzer.Models;
+using System.Text;
 
 namespace SOLTEC.CodeAnalyzer.Report;
-
-using SOLTEC.CodeAnalyzer.Models;
-using System.Text;
 
 /// <summary>
 /// Generates a Markdown report from analysis results.

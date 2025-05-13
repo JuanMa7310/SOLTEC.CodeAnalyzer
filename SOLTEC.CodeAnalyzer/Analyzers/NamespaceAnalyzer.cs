@@ -1,57 +1,50 @@
-﻿// File: NamespaceAnalyzer.cs
-
-namespace SOLTEC.CodeAnalyzer.Analyzers;
+﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
 
 using System.Text.RegularExpressions;
 
 /// <summary>
-/// Analyzes whether the namespace of a class follows SOLTEC standards.
+/// Validates that the namespace of a file is correct according to the SOLTEC standards.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var result = NamespaceAnalyzer.AnalyzeNamespace("C:\\Projects\\SOLTEC\\Core\\Utils\\MyClass.cs");
-/// if (!result.IsValid)
-/// {
-///     Console.WriteLine(result.ErrorMessage);
-/// }
+/// var (isValid, error) = NamespaceAnalyzer.AnalyzeNamespace(filePath, fileContent, projectRoot);
 /// ]]>
 /// </example>
-public static class NamespaceAnalyzer
+public static partial class NamespaceAnalyzer
 {
     /// <summary>
-    /// Validates that the namespace is declared at file level and follows the SOLTEC naming convention.
+    /// Analyzes the namespace declaration in a C# file.
     /// </summary>
-    /// <param name="filePath">The full path to the .cs file.</param>
+    /// <param name="filePath">The full path of the file.</param>
     /// <param name="fileContent">The content of the file.</param>
-    /// <param name="baseDirectory">The root path of the analyzed project (used to validate namespace nesting).</param>
+    /// <param name="projectRoot">The root path of the project.</param>
     /// <returns>A tuple indicating whether the namespace is valid and an optional error message.</returns>
-    public static (bool IsValid, string ErrorMessage) AnalyzeNamespace(string filePath, string fileContent, string baseDirectory)
+    public static (bool isValid, string errorMessage) AnalyzeNamespace(string filePath, string fileContent, string projectRoot)
     {
-        string _relativePath = Path.GetRelativePath(baseDirectory, filePath);
-        string _expectedNamespace = "SOLTEC." + Path.GetDirectoryName(_relativePath)
-            ?.Replace(Path.DirectorySeparatorChar, '.')
-            .TrimEnd('.');
+        var _relativePath = filePath.Replace(projectRoot, "").Replace("\\", "/").Trim('/');
+        var _expectedNamespace = "SOLTEC." + string.Join('.', _relativePath.Split('/')
+            .Where(segment => !segment.EndsWith(".cs"))
+            .Select(segment => segment.Replace(".cs", "")));
 
-        var _namespaceRegex = new Regex(@"^\s*namespace\s+([A-Za-z0-9_.]+)\s*;", RegexOptions.Multiline);
-        var _match = _namespaceRegex.Match(fileContent);
+        var _lines = fileContent.Split('\n');
+        var _namespaceLine = _lines.FirstOrDefault(l => l.TrimStart().StartsWith("namespace "));
 
+        if (string.IsNullOrWhiteSpace(_namespaceLine))
+            return (false, "No namespace declared.");
+
+        var _match = NamespacePattern().Match(_namespaceLine.Trim());
         if (!_match.Success)
-        {
-            return (false, "Namespace declaration not found or incorrectly placed.");
-        }
+            return (false, "Namespace declaration is invalid.");
 
-        string _declaredNamespace = _match.Groups[1].Value.Trim();
-
-        if (!_declaredNamespace.StartsWith("SOLTEC"))
-        {
-            return (false, $"Namespace must start with 'SOLTEC': found '{_declaredNamespace}'.");
-        }
-
+        var _declaredNamespace = _match.Value.Replace("namespace", "").Trim().TrimEnd(';');
         if (_declaredNamespace != _expectedNamespace)
         {
-            return (false, $"Expected namespace '{_expectedNamespace}', but found '{_declaredNamespace}'.");
+            return (false, $"Namespace mismatch. Expected '{_expectedNamespace}' but found '{_declaredNamespace}'.");
         }
 
-        return (true, string.Empty);
+        return (true, "");
     }
+
+    [GeneratedRegex(@"^\s*namespace\s+[A-Za-z0-9_.]+\s*;?", RegexOptions.Multiline)]
+    private static partial Regex NamespacePattern();
 }

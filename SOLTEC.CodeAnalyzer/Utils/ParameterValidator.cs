@@ -1,13 +1,11 @@
-﻿// File: ParameterValidator.cs
-
-namespace SOLTEC.CodeAnalyzer.Utils;
+﻿namespace SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
-/// Validates and parses command-line parameters for the analyzer.
+/// Parses and validates named command-line parameters for the analyzer.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// if (!ParameterValidator.Validate(args, out string input, out string output, out string error))
+/// if (!ParameterValidator.Validate(args, out var path, out var output, out var toConsole, out var error))
 /// {
 ///     Console.WriteLine(error);
 ///     return;
@@ -17,31 +15,56 @@ namespace SOLTEC.CodeAnalyzer.Utils;
 public static class ParameterValidator
 {
     /// <summary>
-    /// Validates the command-line arguments.
+    /// Validates and extracts named parameters.
     /// </summary>
-    /// <param name="args">The input arguments array.</param>
-    /// <param name="projectPath">Output: path to the project to analyze.</param>
-    /// <param name="reportPath">Output: path where the Markdown report should be saved.</param>
-    /// <param name="errorMessage">Output: error message if validation fails.</param>
-    /// <returns>True if the arguments are valid; otherwise, false.</returns>
-    public static bool Validate(string[] args, out string projectPath, out string reportPath, out string errorMessage)
+    /// <param name="args">Command-line arguments.</param>
+    /// <param name="projectPath">Extracted project path.</param>
+    /// <param name="outputPath">Extracted output path.</param>
+    /// <param name="printToConsole">Flag to print results to console.</param>
+    /// <param name="errorMessage">Error message if invalid.</param>
+    /// <returns>True if parameters are valid, false otherwise.</returns>
+    public static bool Validate(string[] args, out string projectPath, out string outputPath, out bool printToConsole, out string errorMessage)
     {
         projectPath = string.Empty;
-        reportPath = string.Empty;
+        outputPath = string.Empty;
+        printToConsole = false;
         errorMessage = string.Empty;
 
-        if (args.Length != 2)
+        for (int _i = 0; _i < args.Length; _i++)
         {
-            errorMessage = "❌ Error: You must provide exactly 2 arguments: <project_path> <report_path>";
+            switch (args[_i])
+            {
+                case "-p":
+                    if (_i + 1 < args.Length) projectPath = args[++_i];
+                    break;
+                case "-o":
+                    if (_i + 1 < args.Length) outputPath = args[++_i];
+                    break;
+                case "-c":
+                    printToConsole = true;
+                    break;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(projectPath) || string.IsNullOrWhiteSpace(outputPath))
+        {
+            errorMessage = """
+            ❌ Error: Missing required parameters.
+
+            Usage:
+              -p <project_path>     Path to the C# project directory
+              -o <output_path>      Path to the Markdown report file
+              -c                    (Optional) Also print results to console
+
+            Example:
+              dotnet run -- -p "C:\\MyProject" -o "C:\\Reports\\output.md" -c
+            """;
             return false;
         }
 
-        projectPath = args[0];
-        reportPath = args[1];
-
         if (!Directory.Exists(projectPath))
         {
-            errorMessage = $"❌ Error: The specified project path does not exist: {projectPath}";
+            errorMessage = $"❌ Error: Project path does not exist: {projectPath}";
             return false;
         }
 

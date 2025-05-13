@@ -1,8 +1,4 @@
-﻿// File: AnalysisResult.cs
-
-namespace SOLTEC.CodeAnalyzer.Models;
-
-using System.Collections.Generic;
+﻿namespace SOLTEC.CodeAnalyzer.Models;
 
 /// <summary>
 /// Represents the result of analyzing a single C# file.
@@ -26,5 +22,5 @@ public class AnalysisResult
     /// <summary>
     /// List of descriptive violation messages found in the file.
     /// </summary>
-    public List<string> Violations { get; set; } = new();
+    public List<string> Violations { get; set; } = [];
 }

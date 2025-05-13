@@ -1,28 +1,39 @@
 # SOLTEC.CodeAnalyzer
 
-**SOLTEC.CodeAnalyzer** is a command-line utility developed in **C# .NET 8** using **C# 12** language features. It analyzes C# classes within a given project directory to ensure they comply with SOLTEC's internal programming standards.
+**SOLTEC.CodeAnalyzer** is a professional C# (.NET 8, C# 12) console utility that analyzes source code files for compliance with SOLTEC's programming standards.
 
-## 🔍 What It Does
+## 🚀 Quick Start
 
-- Scans all `.cs` files in the specified directory.
-- Analyzes each class to verify:
-  - Proper namespace declaration and structure.
-  - XML documentation presence and format (including usage examples).
-  - Variable and constant naming conventions.
-  - Presence of unit and integration tests for methods with logic.
-- Records all rule violations per class.
+You can use the included scripts to run the analyzer interactively:
 
-## 🧾 Output
+- **Windows:** `run-analyzer.bat`
+- **Linux/macOS:** `run-analyzer.sh`
 
-- Generates a detailed **Markdown report** listing:
-  - Files and classes that violate standards.
-  - Specific rules that were not followed.
+Each script will prompt you to:
+- Enter the path to the project directory
+- Enter the path to save the Markdown report
+- Optionally choose to also print results to the console
 
-## 🧑‍💻 How to Use
+## 🔧 CLI Manual Usage
 
 ```bash
-dotnet run -- "C:\Path\To\Project" "C:\Path\To\report.md"
+dotnet run --project SOLTEC.CodeAnalyzer -p <project_path> -o <output_path> [-c]
 ```
 
-- **First argument**: directory path of the project to analyze.
-- **Second argument**: file path to save the generated Markdown report.
+Use `-c` to enable console output.
+
+## 📁 Documentation
+
+Check the `/Documentation` folder for:
+- Description and purpose
+- Features and standards
+- Advanced optional checks
+
+---
+
+## ✅ Main Validations
+
+- Namespace structure and position
+- XML documentation with examples
+- Naming conventions
+- Inheritance restrictions for public classes

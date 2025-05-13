@@ -1,6 +1,4 @@
-﻿// File: FileScanner.cs
-
-namespace SOLTEC.CodeAnalyzer.Utils;
+﻿namespace SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
 /// Provides utility methods to retrieve C# source files from a directory.
@@ -24,8 +22,8 @@ public static class FileScanner
     public static List<string> GetCsFiles(string baseDirectory)
     {
         if (!Directory.Exists(baseDirectory))
-            return new List<string>();
+            return [];
 
-        return Directory.GetFiles(baseDirectory, "*.cs", SearchOption.AllDirectories).ToList();
+        return [.. Directory.GetFiles(baseDirectory, "*.cs", SearchOption.AllDirectories)];
     }
 }
