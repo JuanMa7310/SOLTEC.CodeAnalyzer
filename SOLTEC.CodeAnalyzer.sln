@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOLTEC.CodeAnalyzer", "SOLTEC.CodeAnalyzer\SOLTEC.CodeAnalyzer.csproj", "{3727CD2C-CD9F-42E2-B4D9-18ED78F352BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		AdvancedChecks_EN.md = AdvancedChecks_EN.md
+		AdvancedChecks_ES.md = AdvancedChecks_ES.md
+		Description_EN.md = Description_EN.md
+		Description_ES.md = Description_ES.md
+		Functionality_EN.md = Functionality_EN.md
+		Functionality_ES.md = Functionality_ES.md
+		LICENSE = LICENSE
+		README.md = README.md
+		README_ES.md = README_ES.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3727CD2C-CD9F-42E2-B4D9-18ED78F352BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3727CD2C-CD9F-42E2-B4D9-18ED78F352BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3727CD2C-CD9F-42E2-B4D9-18ED78F352BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3727CD2C-CD9F-42E2-B4D9-18ED78F352BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C8273B5A-2304-4F96-9341-74D05BEE3BDA}
+	EndGlobalSection
+EndGlobal

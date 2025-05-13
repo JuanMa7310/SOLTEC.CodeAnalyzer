@@ -1,28 +1,39 @@
 # SOLTEC.CodeAnalyzer
 
-**SOLTEC.CodeAnalyzer** es una utilidad de línea de comandos desarrollada en **C# .NET 8** utilizando las características del lenguaje **C# 12**. Analiza las clases C# dentro de un directorio de proyecto especificado para comprobar que cumplan con las normas internas de programación de SOLTEC.
+**SOLTEC.CodeAnalyzer** es una utilidad profesional de consola en C# (.NET 8, C# 12) que analiza archivos fuente C# para verificar que cumplan con los estándares de programación de SOLTEC.
 
-## 🔍 Qué Hace
+## 🚀 Inicio Rápido
 
-- Escanea todos los archivos `.cs` en el directorio indicado.
-- Analiza cada clase para verificar:
-  - Declaración y estructura correcta del espacio de nombres.
-  - Presencia y formato de la documentación XML (incluyendo ejemplos de uso).
-  - Convenciones de nomenclatura para variables y constantes.
-  - Existencia de pruebas unitarias e integración para métodos con lógica.
-- Registra todas las violaciones a las normas por clase.
+Puedes utilizar los scripts incluidos para ejecutar el analizador de forma interactiva:
 
-## 🧾 Salida
+- **Windows:** `run-analyzer.bat`
+- **Linux/macOS:** `run-analyzer.sh`
 
-- Genera un informe detallado en **formato Markdown** que incluye:
-  - Archivos y clases que incumplen las normas.
-  - Normas específicas que no se han cumplido.
+Cada script te pedirá:
+- Ruta del proyecto a analizar
+- Ruta del informe Markdown de salida
+- Si deseas imprimir también los resultados en consola
 
-## 🧑‍💻 Cómo Usarlo
+## 🔧 Uso Manual por Línea de Comandos
 
 ```bash
-dotnet run -- "C:\Ruta\Al\Proyecto" "C:\Ruta\Al\informe.md"
+dotnet run --project SOLTEC.CodeAnalyzer -p <ruta_proyecto> -o <ruta_salida> [-c]
 ```
 
-- **Primer argumento**: ruta del directorio del proyecto a analizar.
-- **Segundo argumento**: ruta del archivo donde se guardará el informe Markdown generado.
+Usa `-c` para mostrar resultados en consola.
+
+## 📁 Documentación
+
+Consulta la carpeta `/Documentation` para:
+- Descripción general y propósito
+- Funcionalidades y normas analizadas
+- Comprobaciones avanzadas opcionales
+
+---
+
+## ✅ Validaciones Principales
+
+- Estructura y posición del namespace
+- Documentación XML con ejemplos
+- Convenciones de nombres
+- Restricciones de herencia para clases públicas
