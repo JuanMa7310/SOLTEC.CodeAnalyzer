@@ -5,7 +5,7 @@ using SOLTEC.CodeAnalyzer.Models;
 
 /// <summary>
 /// Entry point for the SOLTEC.CodeAnalyzer console application.
-/// Analyzes C# classes, records and interfaces for compliance with SOLTEC coding standards.
+/// Analyzes C# source files and generates a Markdown report based on coding standards.
 /// </summary>
 /// <example>
 /// <![CDATA[
@@ -22,7 +22,10 @@ if (!ParameterValidator.Validate(args, out string _projectPath, out string _repo
 try
 {
     Console.WriteLine("🔍 Starting analysis...");
-    List<AnalysisResult> _results = TypeAnalyzer.AnalyzeAllTypes(_projectPath);
+    var _projectType = ProjectTypeDetector.DetectType(_projectPath);
+    Console.WriteLine($"📦 Detected project type: {_projectType}");
+
+    var _results = TypeAnalyzer.AnalyzeAllTypes(_projectPath, _projectType);
     MarkdownReportGenerator.Generate(_results, _reportPath);
     Console.WriteLine($"✅ Report saved to: {_reportPath}");
 

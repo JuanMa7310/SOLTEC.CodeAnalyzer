@@ -1,73 +1,39 @@
-# SOLTEC.CodeAnalyzer - Overview
+# SOLTEC.CodeAnalyzer
 
-**SOLTEC.CodeAnalyzer** is a professional-grade console utility developed in C# (.NET 8, C# 12) that performs static code analysis on C# source files. It validates adherence to SOLTEC's strict internal programming standards.
+**SOLTEC.CodeAnalyzer** is a professional C# (.NET 8, C# 12) console utility that analyzes source code files for compliance with SOLTEC's programming standards.
 
-## 🔍 What It Does
+## 🚀 Quick Start
 
-- Analyzes all `.cs` files in a given project directory.
-- Verifies that each type declaration (class, interface, record, enum, struct, delegate) complies with:
-  - Namespace rules (starts with `SOLTEC.` and matches folder hierarchy).
-  - XML documentation (`<summary>` and `<example>`) for public/protected types and members.
-  - Naming conventions for variables, constants, and parameters.
-- Supports output to Markdown file and optionally to console.
-- Parameters accept professional CLI flags:
-  - `-p`: Path to the project folder.
-  - `-o`: Output Markdown report file path.
-  - `-c`: (Optional) Also print violations to console.
+You can use the included scripts to run the analyzer interactively:
 
-## 🧪 Supported Type Elements
+- **Windows:** `run-analyzer.bat`
+- **Linux/macOS:** `run-analyzer.sh`
 
-- Classes
-- Records
-- Interfaces
-- Enums
-- Structs
-- Delegates
+Each script will prompt you to:
+- Enter the path to the project directory
+- Enter the path to save the Markdown report
+- Optionally choose to also print results to the console
 
-## 📤 Output
+## 🔧 CLI Manual Usage
 
-- Markdown report with:
-  - Summary of files analyzed
-  - Violations listed per file and per element
-- Optional inline console output with the `-c` flag
+```bash
+dotnet run --project SOLTEC.CodeAnalyzer -p <project_path> -o <output_path> [-c]
+```
 
+Use `-c` to enable console output.
 
-# SOLTEC.CodeAnalyzer - Features
+## 📁 Documentation
 
-## ✅ Command-Line Interface
+Check the `/Documentation` folder for:
+- Description and purpose
+- Features and standards
+- Advanced optional checks
 
-- Supports CLI flags:
-  - `-p <project_path>`: Specify the project directory to analyze.
-  - `-o <output_path>`: Specify the Markdown file to write the report.
-  - `-c`: (Optional) Print violations to the console in addition to the file.
+---
 
-## 📂 Code Parsing and Analysis
+## ✅ Main Validations
 
-- Recursively searches for `.cs` files within the specified directory.
-- Parses each file to detect:
-  - Class, record, interface, enum, struct, and delegate declarations.
-  - Public or protected methods and properties.
-
-## 📏 Rule Enforcement
-
-- Validates that namespaces start with `SOLTEC.` and follow the folder structure.
-- Enforces XML documentation:
-  - `<summary>` and `<example>` tags on public/protected types and methods.
-  - `<summary>` tag on public/protected properties.
-- Enforces naming conventions:
-  - Local variables: `_x`
-  - Class-level fields: `gX`
-  - Constants: `gcX` (global), `_cX` (local)
-  - Method parameters: lowercase initial
-- Detects missing documentation or naming rule violations.
-
-## 📑 Markdown Report Generation
-
-- Generates a structured Markdown report with:
-  - Timestamp of analysis
-  - Summary of total violations
-  - Violations grouped by file
-
-## 🌐 Optional Console Output
-
-- Using `-c`, violations are also printed to the console for real-time feedback.
+- Namespace structure and position
+- XML documentation with examples
+- Naming conventions
+- Inheritance restrictions for public classes

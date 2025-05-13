@@ -1,73 +1,39 @@
-# SOLTEC.CodeAnalyzer - Descripción General
+# SOLTEC.CodeAnalyzer
 
-**SOLTEC.CodeAnalyzer** es una herramienta de consola de nivel profesional desarrollada en C# (.NET 8, C# 12) que realiza análisis estático de archivos fuente C#. Verifica el cumplimiento de las estrictas normas internas de programación de SOLTEC.
+**SOLTEC.CodeAnalyzer** es una utilidad profesional de consola en C# (.NET 8, C# 12) que analiza archivos fuente C# para verificar que cumplan con los estándares de programación de SOLTEC.
 
-## 🔍 Qué Hace
+## 🚀 Inicio Rápido
 
-- Analiza todos los archivos `.cs` en un directorio de proyecto.
-- Verifica que cada tipo (class, interface, record, enum, struct, delegate) cumpla con:
-  - Reglas de espacio de nombres (inicia con `SOLTEC.` y coincide con la estructura de carpetas).
-  - Documentación XML (`<summary>` y `<example>`) para tipos y miembros públicos/protegidos.
-  - Convenciones de nombres para variables, constantes y parámetros.
-- Soporta salida en archivo Markdown y opcionalmente en consola.
-- Parámetros con indicadores profesionales:
-  - `-p`: Ruta al proyecto a analizar.
-  - `-o`: Ruta del archivo Markdown de salida.
-  - `-c`: (Opcional) Muestra las violaciones también en consola.
+Puedes utilizar los scripts incluidos para ejecutar el analizador de forma interactiva:
 
-## 🧪 Tipos Soportados
+- **Windows:** `run-analyzer.bat`
+- **Linux/macOS:** `run-analyzer.sh`
 
-- Clases
-- Registros (records)
-- Interfaces
-- Enumerados
-- Estructuras (structs)
-- Delegados (delegates)
+Cada script te pedirá:
+- Ruta del proyecto a analizar
+- Ruta del informe Markdown de salida
+- Si deseas imprimir también los resultados en consola
 
-## 📤 Salida
+## 🔧 Uso Manual por Línea de Comandos
 
-- Informe Markdown con:
-  - Resumen de archivos analizados
-  - Lista de violaciones por archivo y tipo
-- Salida opcional en consola con el parámetro `-c`
+```bash
+dotnet run --project SOLTEC.CodeAnalyzer -p <ruta_proyecto> -o <ruta_salida> [-c]
+```
 
+Usa `-c` para mostrar resultados en consola.
 
-# SOLTEC.CodeAnalyzer - Funcionalidades
+## 📁 Documentación
 
-## ✅ Interfaz de Línea de Comandos
+Consulta la carpeta `/Documentation` para:
+- Descripción general y propósito
+- Funcionalidades y normas analizadas
+- Comprobaciones avanzadas opcionales
 
-- Soporta parámetros con indicador:
-  - `-p <ruta_proyecto>`: Directorio del proyecto a analizar.
-  - `-o <ruta_salida>`: Archivo Markdown donde guardar el informe.
-  - `-c`: (Opcional) Imprime las violaciones también en consola.
+---
 
-## 📂 Análisis de Código
+## ✅ Validaciones Principales
 
-- Busca de forma recursiva archivos `.cs` en el directorio especificado.
-- Detecta en cada archivo:
-  - Clases, registros, interfaces, enumerados, estructuras y delegados.
-  - Métodos y propiedades públicas o protegidas.
-
-## 📏 Validación de Reglas
-
-- Verifica que los espacios de nombres comiencen con `SOLTEC.` y coincidan con la estructura de carpetas.
-- Requiere documentación XML:
-  - Etiquetas `<summary>` y `<example>` en tipos y métodos públicos/protegidos.
-  - Etiqueta `<summary>` en propiedades públicas/protegidas.
-- Reglas de nombres:
-  - Variables locales: `_x`
-  - Campos a nivel de clase: `gX`
-  - Constantes: `gcX` (global), `_cX` (local)
-  - Parámetros: inicial minúscula
-- Detecta faltas de documentación o nombres inválidos.
-
-## 📑 Generación de Informe Markdown
-
-- Crea un informe estructurado con:
-  - Fecha y hora del análisis
-  - Resumen de violaciones
-  - Violaciones agrupadas por archivo
-
-## 🌐 Salida Opcional por Consola
-
-- Con `-c`, las violaciones también se imprimen en consola para retroalimentación en tiempo real.
+- Estructura y posición del namespace
+- Documentación XML con ejemplos
+- Convenciones de nombres
+- Restricciones de herencia para clases públicas
