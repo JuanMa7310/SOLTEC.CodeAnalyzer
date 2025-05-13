@@ -1,8 +1,6 @@
-﻿// File: NamespaceAnalyzer.cs
+﻿using System.Text.RegularExpressions;
 
 namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Analyzes whether the namespace of a class follows SOLTEC standards.

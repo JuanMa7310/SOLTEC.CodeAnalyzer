@@ -1,46 +1,45 @@
-﻿// File: ClassAnalyzer.cs
+﻿using SOLTEC.CodeAnalyzer.Models;
+using SOLTEC.CodeAnalyzer.Utils;
 
 namespace SOLTEC.CodeAnalyzer.Analyzers;
 
-using SOLTEC.CodeAnalyzer.Models;
-
 /// <summary>
-/// Coordinates the analysis of C# classes using SOLTEC standards.
+/// Performs unified analysis of classes, records, and interfaces in a project,
+/// applying SOLTEC programming standards.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var results = ClassAnalyzer.AnalyzeAllClasses("C:\\MyProject");
-/// foreach (var result in results)
-/// {
-///     Console.WriteLine($"{result.FileName}: {result.Violations.Count} issue(s)");
-/// }
+/// var results = TypeAnalyzer.AnalyzeAllTypes("C:\\MyProject");
 /// ]]>
 /// </example>
-public static class ClassAnalyzer
+public static class TypeAnalyzer
 {
     /// <summary>
-    /// Analyzes all C# files in a given directory recursively.
+    /// Analyzes all C# files in the given directory for SOLTEC coding compliance.
     /// </summary>
-    /// <param name="projectPath">The root folder of the project to analyze.</param>
-    /// <returns>A list of analysis results for each class/file.</returns>
-    public static List<AnalysisResult> AnalyzeAllClasses(string projectPath)
+    /// <param name="projectPath">Base directory of the project.</param>
+    /// <returns>List of results with violations per file.</returns>
+    public static List<AnalysisResult> AnalyzeAllTypes(string projectPath)
     {
         var _results = new List<AnalysisResult>();
-        var _csFiles = Directory.GetFiles(projectPath, "*.cs", SearchOption.AllDirectories);
+        var _csFiles = FileScanner.GetCsFiles(projectPath);
 
-        foreach (string _file in _csFiles)
+        foreach (var _file in _csFiles)
         {
             string _content = File.ReadAllText(_file);
             var _violations = new List<string>();
 
-            // Run all analyzers
+            // Verificar namespace
             var (namespaceValid, namespaceError) = NamespaceAnalyzer.AnalyzeNamespace(_file, _content, projectPath);
             if (!namespaceValid) _violations.Add(namespaceError);
 
+            // Verificar documentación XML
             _violations.AddRange(XmlDocAnalyzer.AnalyzeDocumentation(_content));
+
+            // Verificar nomenclatura
             _violations.AddRange(NamingRulesAnalyzer.AnalyzeNamingRules(_content));
 
-            // If there are violations, save the result
+            // Guardar resultados si hay violaciones
             if (_violations.Any())
             {
                 _results.Add(new AnalysisResult

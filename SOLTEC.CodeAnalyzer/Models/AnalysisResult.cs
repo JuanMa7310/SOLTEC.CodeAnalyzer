@@ -1,8 +1,6 @@
-﻿// File: AnalysisResult.cs
+﻿using System.Collections.Generic;
 
 namespace SOLTEC.CodeAnalyzer.Models;
-
-using System.Collections.Generic;
 
 /// <summary>
 /// Represents the result of analyzing a single C# file.

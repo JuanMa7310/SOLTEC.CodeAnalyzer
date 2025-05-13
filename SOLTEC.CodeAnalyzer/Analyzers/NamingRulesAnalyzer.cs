@@ -1,8 +1,6 @@
-﻿// File: NamingRulesAnalyzer.cs
+﻿using System.Text.RegularExpressions;
 
 namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Validates that variable, constant and parameter names follow SOLTEC naming conventions.

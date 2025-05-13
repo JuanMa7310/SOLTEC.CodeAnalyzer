@@ -1,6 +1,4 @@
-﻿// File: FileScanner.cs
-
-namespace SOLTEC.CodeAnalyzer.Utils;
+﻿namespace SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
 /// Provides utility methods to retrieve C# source files from a directory.

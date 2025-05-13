@@ -1,8 +1,6 @@
-﻿// File: XmlDocAnalyzer.cs
+﻿using System.Text.RegularExpressions;
 
 namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Analyzes the presence and completeness of XML documentation in C# code.

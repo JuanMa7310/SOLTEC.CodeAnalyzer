@@ -1,19 +1,17 @@
-﻿// File: Program.cs
+﻿using SOLTEC.CodeAnalyzer.Analyzers;
+using SOLTEC.CodeAnalyzer.Report;
+using SOLTEC.CodeAnalyzer.Utils;
+using SOLTEC.CodeAnalyzer.Models;
 
 namespace SOLTEC.CodeAnalyzer;
 
-using SOLTEC.CodeAnalyzer.Analyzers;
-using SOLTEC.CodeAnalyzer.Report;
-using SOLTEC.CodeAnalyzer.Utils;
-
 /// <summary>
 /// Entry point for the SOLTEC.CodeAnalyzer console application.
-/// Analyzes C# files for compliance with SOLTEC coding standards
-/// and generates a Markdown report listing violations.
+/// Supports parameterized analysis of C# types and generation of Markdown reports.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// dotnet run -- "C:\\Projects\\MiProyecto" "C:\\Reports\\reporte.md"
+/// dotnet run -- -p "C:\\Projects\\MiProyecto" -o "C:\\Reports\\reporte.md" -c
 /// ]]>
 /// </example>
 internal class Program
@@ -21,10 +19,10 @@ internal class Program
     /// <summary>
     /// Main execution method.
     /// </summary>
-    /// <param name="args">Arguments: [0] = project path, [1] = output report path</param>
+    /// <param name="args">Supported arguments: -p <project_path> -o <report_path> [-c]</param>
     private static void Main(string[] args)
     {
-        if (!ParameterValidator.Validate(args, out string _projectPath, out string _reportPath, out string _error))
+        if (!ParameterValidator.Validate(args, out string _projectPath, out string _reportPath, out bool _printToConsole, out string _error))
         {
             Console.WriteLine(_error);
             return;
@@ -33,9 +31,22 @@ internal class Program
         try
         {
             Console.WriteLine("🔍 Starting analysis...");
-            var _results = ClassAnalyzer.AnalyzeAllClasses(_projectPath);
+            List<AnalysisResult> _results = TypeAnalyzer.AnalyzeAllTypes(_projectPath);
             MarkdownReportGenerator.Generate(_results, _reportPath);
-            Console.WriteLine($"✅ Analysis complete. Report saved to: {_reportPath}");
+            Console.WriteLine($"✅ Report saved to: {_reportPath}");
+
+            if (_printToConsole)
+            {
+                Console.WriteLine("\n📤 Violations Summary:");
+                foreach (var _result in _results)
+                {
+                    Console.WriteLine($"\n📄 {_result.FilePath}");
+                    foreach (var _violation in _result.Violations)
+                    {
+                        Console.WriteLine($"  ❌ {_violation}");
+                    }
+                }
+            }
         }
         catch (Exception _ex)
         {
