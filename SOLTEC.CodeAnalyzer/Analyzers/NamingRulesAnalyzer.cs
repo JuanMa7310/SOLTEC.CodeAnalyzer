@@ -1,6 +1,6 @@
-﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
+﻿using System.Text.RegularExpressions;
 
-using System.Text.RegularExpressions;
+namespace SOLTEC.CodeAnalyzer.Analyzers;
 
 /// <summary>
 /// Analyzes naming conventions of variables and constants based on SOLTEC standards.
@@ -20,10 +20,16 @@ public static partial class NamingRulesAnalyzer
     public static List<string> AnalyzeNamingRules(string fileContent)
     {
         var _violations = new List<string>();
+        var _lines = fileContent.Split('\n');
 
         // Local variables: _x
         foreach (Match _match in LocalVariablePattern().Matches(fileContent))
         {
+            int _lineNumber = fileContent.Substring(0, _match.Index).Split('\n').Length - 1;
+            if (IsInMethodSignature(_lines, _lineNumber))
+            {
+                continue;
+            }
             string _name = _match.Groups[1].Value;
             if (!_name.StartsWith('_'))
             {
@@ -63,12 +69,23 @@ public static partial class NamingRulesAnalyzer
 
         return _violations;
     }
+    // Comprobar si la coincidencia está dentro de una cabecera de método (línea contiene '(', ')', y no '{')
+    private static bool IsInMethodSignature(string[] lines, int matchIndex)
+    {
+        for (int i = matchIndex; i >= 0; i--)
+        {
+            string _line = lines[i].Trim();
+            if (_line.Contains("{")) return false;
+            if (_line.Contains(")") && _line.Contains("(")) return true;
+        }
+        return false;
+    }
 
     // ----------------------
     // REGEX HELPERS
     // ----------------------
 
-    [GeneratedRegex(@"\b(?:var|int|float|double|string|bool|decimal|char)\s+(_?[a-zA-Z_][\w]*)\s*=", RegexOptions.Compiled)]
+    [GeneratedRegex(@"\b(?:var|int|float|double|string|bool|decimal|char)\s+(_?[a-zA-Z_][\w]*)\s*(?:[=;])", RegexOptions.Compiled)]
     private static partial Regex LocalVariablePattern();
 
     [GeneratedRegex(@"\b(?:public|private|protected|internal)\s+(?!const)[\w<>\[\]]+\s+(g\w+)\s*(=|;)", RegexOptions.Compiled)]

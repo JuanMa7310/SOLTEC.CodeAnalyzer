@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SOLTEC.CodeAnalyzer": {
+      "commandName": "Project",
+      "commandLineArgs": "-p \"C:\\SOLTEC\\Source\\SOLTEC.Core\\SOLTEC.Core\" -o \"C:\\SOLTEC\\Source\\Report.md\" --console"
+    }
+  }
+}

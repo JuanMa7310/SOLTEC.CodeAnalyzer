@@ -1,6 +1,6 @@
-﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
+﻿using System.Text.RegularExpressions;
 
-using System.Text.RegularExpressions;
+namespace SOLTEC.CodeAnalyzer.Analyzers;
 
 /// <summary>
 /// Validates the structure and position of namespace declarations within a C# file.
