@@ -8,7 +8,7 @@ namespace SOLTEC.CodeAnalyzer.Report;
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var results = ClassAnalyzer.AnalyzeAllClasses("C:\\MyProject");
+/// var _results = ClassAnalyzer.AnalyzeAllClasses("C:\\MyProject");
 /// MarkdownReportGenerator.Generate(results, "C:\\Report\\output.md");
 /// ]]>
 /// </example>
@@ -37,10 +37,21 @@ public static class MarkdownReportGenerator
             _sb.AppendLine($"## 📄 `{Path.GetFileName(_result.FilePath)}`");
             _sb.AppendLine($"**Path**: `{_result.FilePath}`");
             _sb.AppendLine();
+            _sb.AppendLine($"Violations ({_result.Violations.Count}): ");
+            _sb.AppendLine();
             foreach (var _violation in _result.Violations)
             {
                 _sb.AppendLine($"- ❌ {_violation}");
             }
+            _sb.AppendLine();
+            _sb.AppendLine();
+            _sb.AppendLine($"Alertss ({_result.Alerts.Count}): ");
+            _sb.AppendLine();
+            foreach (var _alert in _result.Alerts)
+            {
+                _sb.AppendLine($"- ❌ {_alert}");
+            }
+            _sb.AppendLine($"-----------------------------------------");
             _sb.AppendLine();
         }
 

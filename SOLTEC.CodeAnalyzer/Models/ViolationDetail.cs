@@ -1,11 +1,12 @@
-﻿namespace SOLTEC.CodeAnalyzer.Models;
+﻿
+namespace SOLTEC.CodeAnalyzer.Models;
 
 /// <summary>
 /// Represents a detailed rule violation found during analysis.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var detail = new ViolationDetail
+/// var _detail = new ViolationDetail
 /// {
 ///     Rule = "Missing XML summary",
 ///     LineNumber = 42

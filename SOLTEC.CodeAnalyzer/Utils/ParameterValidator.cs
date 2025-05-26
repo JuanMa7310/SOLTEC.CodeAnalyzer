@@ -1,4 +1,5 @@
-﻿namespace SOLTEC.CodeAnalyzer.Utils;
+﻿
+namespace SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
 /// Parses and validates named command-line parameters for the analyzer.
@@ -35,12 +36,15 @@ public static class ParameterValidator
             switch (args[_i])
             {
                 case "-p":
+                case "--project":
                     if (_i + 1 < args.Length) projectPath = args[++_i];
                     break;
                 case "-o":
+                case "--output":
                     if (_i + 1 < args.Length) outputPath = args[++_i];
                     break;
                 case "-c":
+                case "--console":
                     printToConsole = true;
                     break;
             }
@@ -52,12 +56,16 @@ public static class ParameterValidator
             ❌ Error: Missing required parameters.
 
             Usage:
-              -p <project_path>     Path to the C# project directory
-              -o <output_path>      Path to the Markdown report file
-              -c                    (Optional) Also print results to console
+              -p <project_path>         Path to the C# project directory
+              --project <project_path>  Path to the C# project directory
+              -o <output_path>          Path to the Markdown report file
+              --output <output_path>    Path to the Markdown report file
+              -c                        (Optional) Also print results to console
+              --console                 (Optional) Also print results to console
 
             Example:
               dotnet run -- -p "C:\\MyProject" -o "C:\\Reports\\output.md" -c
+              dotnet run -- --project "C:\\MyProject" -output "C:\\Reports\\output.md" -console
             """;
             return false;
         }
@@ -65,6 +73,11 @@ public static class ParameterValidator
         if (!Directory.Exists(projectPath))
         {
             errorMessage = $"❌ Error: Project path does not exist: {projectPath}";
+            return false;
+        }
+        if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
+        {
+            errorMessage = $"❌ Error: Project path does not exist: {outputPath}";
             return false;
         }
 

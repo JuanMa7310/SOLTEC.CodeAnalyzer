@@ -1,7 +1,6 @@
 ﻿using SOLTEC.CodeAnalyzer.Analyzers;
 using SOLTEC.CodeAnalyzer.Report;
 using SOLTEC.CodeAnalyzer.Utils;
-using SOLTEC.CodeAnalyzer.Models;
 
 /// <summary>
 /// Entry point for the SOLTEC.CodeAnalyzer console application.
@@ -35,10 +34,20 @@ try
         foreach (var _result in _results)
         {
             Console.WriteLine($"\n📄 {_result.FilePath}");
+            Console.WriteLine();
+            Console.WriteLine($"\nViolations ({_result.Violations.Count} :");
             foreach (var _violation in _result.Violations)
             {
                 Console.WriteLine($"  ❌ {_violation}");
             }
+            Console.WriteLine();
+            Console.WriteLine($"\nAlerts ({_result.Alerts.Count} :");
+            foreach (var _alert in _result.Alerts)
+            {
+                Console.WriteLine($"  ❌ {_alert}");
+            }
+            Console.WriteLine($"----------------------------------------");
+            Console.WriteLine();
         }
     }
 }
