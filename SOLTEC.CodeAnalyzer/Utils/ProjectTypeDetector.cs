@@ -7,8 +7,8 @@ namespace SOLTEC.CodeAnalyzer.Utils;
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var projectType = ProjectTypeDetector.DetectType("C:\\MyProject");
-/// Console.WriteLine($"Detected: {projectType}");
+/// var _projectType = ProjectTypeDetector.DetectType("C:\\MyProject");
+/// Console.WriteLine($"Detected: {_projectType}");
 /// ]]>
 /// </example>
 public static class ProjectTypeDetector

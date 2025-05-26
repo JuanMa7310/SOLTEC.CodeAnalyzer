@@ -1,4 +1,5 @@
-﻿namespace SOLTEC.CodeAnalyzer.Enums;
+﻿
+namespace SOLTEC.CodeAnalyzer.Enums;
 
 /// <summary>
 /// Possible project types.

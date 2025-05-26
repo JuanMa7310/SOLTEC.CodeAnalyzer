@@ -1,20 +1,21 @@
-namespace SOLTEC.CodeAnalyzer.Analyzers;
-
 using System.Text.RegularExpressions;
+
+namespace SOLTEC.CodeAnalyzer.Analyzers;
 
 /// <summary>
 /// Performs deep analysis on type and method implementations for code quality rules.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var violations = ImplementationAnalyzer.AnalyzeImplementation(fileContent);
+/// var _violations = ImplementationAnalyzer.AnalyzeImplementation(fileContent);
 /// ]]>
 /// </example>
 public static partial class ImplementationAnalyzer
 {
-    public static List<string> AnalyzeImplementation(string fileContent)
+    public static (List<string> violations, List<string> alerts) AnalyzeImplementation(string fileContent)
     {
         var _violations = new List<string>();
+        var _alerts = new List<string>();
 
         _violations.AddRange(DetectEmptyPublicTypes(fileContent));
         _violations.AddRange(DetectUselessPublicMethods(fileContent));
@@ -22,10 +23,10 @@ public static partial class ImplementationAnalyzer
         _violations.AddRange(DetectUnusedParameters(fileContent));
         _violations.AddRange(DetectEmptyCatchBlocks(fileContent));
         _violations.AddRange(DetectUnusedFields(fileContent));
-        _violations.AddRange(DetectEmptyPublicConstructors(fileContent));
+        _alerts.AddRange(DetectEmptyPublicConstructors(fileContent));
         _violations.AddRange(DetectMissingReturnStatements(fileContent));
 
-        return _violations;
+        return (_violations, _alerts);
     }
 
     private static List<string> DetectEmptyPublicTypes(string content)
@@ -186,7 +187,7 @@ public static partial class ImplementationAnalyzer
 
     private static List<string> DetectEmptyPublicConstructors(string content)
     {
-        var _violations = new List<string>();
+        var _alerts = new List<string>();
         var _matches = PublicCtorPattern().Matches(content);
 
         foreach (Match _match in _matches)
@@ -196,11 +197,11 @@ public static partial class ImplementationAnalyzer
 
             if (string.IsNullOrWhiteSpace(_body) || CommentOnlyPattern().IsMatch(_body))
             {
-                _violations.Add($"Public constructor for '{_className}' is empty.");
+                _alerts.Add($"Public constructor for '{_className}' is empty.");
             }
         }
 
-        return _violations;
+        return _alerts;
     }
 
     private static List<string> DetectMissingReturnStatements(string content)
@@ -258,7 +259,7 @@ public static partial class ImplementationAnalyzer
     [GeneratedRegex(@"(public)\s+[\w<>\[\]]+\s+(\w+)\s*\([^\)]*\)\s*{([^}]*)}", RegexOptions.Multiline)]
     private static partial Regex PublicMethodPattern();
 
-    [GeneratedRegex(@"^\s*(//.*|\s)*$", RegexOptions.Multiline)]
+    [GeneratedRegex(@"^(?:\s*|//.*|/\*.*?\*/)*$", RegexOptions.Singleline)]
     private static partial Regex CommentOnlyPattern();
 
     [GeneratedRegex(@"throw\s+new\s+NotImplementedException\s*\(\s*\);", RegexOptions.Multiline)]

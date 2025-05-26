@@ -1,14 +1,15 @@
-﻿namespace SOLTEC.CodeAnalyzer.Utils;
+﻿
+namespace SOLTEC.CodeAnalyzer.Utils;
 
 /// <summary>
 /// Provides utility methods to retrieve C# source files from a directory.
 /// </summary>
 /// <example>
 /// <![CDATA[
-/// var files = FileScanner.GetCsFiles("C:\\MyProject");
-/// foreach (var f in files)
+/// var _files = FileScanner.GetCsFiles("C:\\MyProject");
+/// foreach (var _file in _files)
 /// {
-///     Console.WriteLine(f);
+///     Console.WriteLine(_file);
 /// }
 /// ]]>
 /// </example>

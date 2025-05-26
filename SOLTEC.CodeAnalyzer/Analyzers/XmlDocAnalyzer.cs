@@ -1,7 +1,7 @@
-﻿namespace SOLTEC.CodeAnalyzer.Analyzers;
-
-using SOLTEC.CodeAnalyzer.Enums;
+﻿using SOLTEC.CodeAnalyzer.Enums;
 using System.Text.RegularExpressions;
+
+namespace SOLTEC.CodeAnalyzer.Analyzers;
 
 /// <summary>
 /// Validates XML documentation presence for public and protected members depending on project type.
